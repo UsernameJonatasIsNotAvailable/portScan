@@ -13,8 +13,14 @@ def varredura_portas(alvo, portas):
             client.close()
     except s.gaierror:
         print("Erro: Endereço do alvo inválido.")
+    except s.timeout:
+        print("Erro: Tempo limite da conexão excedido.")
+    except ConnectionRefusedError:
+        print("Erro: Conexão recusada pelo alvo.")
+    except OSError as e:
+        print(f"Erro de sistema operacional: {e}")
     except Exception as e:
-        print(f"Ocorreu um erro: {e}")
+        print(f"Ocorreu um erro inesperado: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
