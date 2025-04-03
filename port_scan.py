@@ -1,26 +1,27 @@
 import socket as s
 import argparse
+import asyncio
 
-def varredura_portas(alvo, portas):
-
+async def varredura_portas(alvo, porta, portas_abertas):
     try:
-        for porta in portas:
-            client = s.socket(s.AF_INET, s.SOCK_STREAM)
-            client.settimeout(0.05)
+        client = s.socket(s.AF_INET, s.SOCK_STREAM)
+        client.settimeout(0.05)
 
-            if client.connect_ex((alvo, porta)) == 0:
-                print(f"Porta aberta ==> {porta}")
-            client.close()
-    except s.gaierror:
-        print("Erro: Endereço do alvo inválido.")
-    except s.timeout:
-        print("Erro: Tempo limite da conexão excedido.")
-    except ConnectionRefusedError:
-        print("Erro: Conexão recusada pelo alvo.")
-    except OSError as e:
-        print(f"Erro de sistema operacional: {e}")
+        if client.connect_ex((alvo, porta)) == 0:
+            print(f"Porta aberta ==> {porta}")
+        client.close()
+    except (s.gaierror, s.timeout, ConnectionRefusedError, OSError):
+        pass
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
+        print(f"Ocorreu um erro na porta {porta}: {e}")
+
+async def varredura_portas_async(alvo, portas):
+    portas_abertas = []
+    tarefas = [varredura_portas(alvo, porta, portas_abertas) for porta in portas]
+    await asyncio.gather(*tarefas)
+
+    for porta in portas_abertas:
+        print(f"Porta aberta ==> {porta}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -37,4 +38,4 @@ if "-" in portas_input:
 else:
     portas = [int(p) for p in portas_input.split(",")]
 
-varredura_portas(alvo, portas)
+asyncio.run(varredura_portas_async(alvo, portas))
