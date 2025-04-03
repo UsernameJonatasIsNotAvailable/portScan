@@ -9,6 +9,7 @@ async def varredura_portas(alvo, porta, portas_abertas):
 
         if client.connect_ex((alvo, porta)) == 0:
             print(f"Porta aberta ==> {porta}")
+            portas_abertas.append(porta)
         client.close()
     except (s.gaierror, s.timeout, ConnectionRefusedError, OSError):
         pass
@@ -19,9 +20,6 @@ async def varredura_portas_async(alvo, portas):
     portas_abertas = []
     tarefas = [varredura_portas(alvo, porta, portas_abertas) for porta in portas]
     await asyncio.gather(*tarefas)
-
-    for porta in portas_abertas:
-        print(f"Porta aberta ==> {porta}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
